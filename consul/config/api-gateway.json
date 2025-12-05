@@ -1,0 +1,15 @@
+{
+  "service": {
+    "id": "api-gateway",
+    "name": "api-gateway",
+    "address": "api-gateway",
+    "port": 9000,
+    "checks": [
+      {
+        "http": "http://api-gateway:9000/health",
+        "interval": "10s",
+        "timeout": "1s"
+      }
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+    # --------------------------------------------------------
+    # 1. Consul
+    # --------------------------------------------------------
+    consul:
+        image: hashicorp/consul:latest
+        container_name: consul
+        command: agent -server -bootstrap -ui -client=0.0.0.0 -config-dir=/consul/config
+        volumes:
+            - ./consul/config:/consul/config
+        ports:
+            - '8500:8500'
+            - '8600:8600/udp'
+        networks:
+            - micro_net
+        restart: unless-stopped
+
+    # --------------------------------------------------------
+    # 2. Auth Service (scalable)
+    # --------------------------------------------------------
+    auth-service:
+        image: flaminglassoo1996/auth-service:1.0.2
+        # deploy:
+        #     replicas: 2 # <--- SCALE HERE (multiple instances)
+        depends_on:
+            - consul
+        # environment:
+        #     - CONSUL_HTTP_ADDR=consul:8500
+        env_file:
+            - ./env/auth-service.env
+        networks:
+            - micro_net
+        restart: unless-stopped
+
+    # --------------------------------------------------------
+    # 3. API Gateway
+    # --------------------------------------------------------
+    api-gateway:
+        image: flaminglassoo1996/api-gateway:1.0.3
+        depends_on:
+            - consul
+        ports:
+            - '9000:9000'
+        env_file:
+            - ./env/api-gateway.env
+        networks:
+            - micro_net
+        restart: unless-stopped
+
+    # --------------------------------------------------------
+    # 4. Envoy Proxy (front of everything)
+    # --------------------------------------------------------
+    envoy:
+        image: envoyproxy/envoy:v1.33-latest
+        container_name: envoy
+        depends_on:
+            - consul
+            - api-gateway
+            - auth-service
+        ports:
+            - '8080:8080' # envoy public ingress
+            - '9901:9901' # envoy admin
+        volumes:
+            - ./envoy/ingress.yaml:/etc/envoy/envoy.yaml:ro
+        networks:
+            - micro_net
+        restart: unless-stopped
+
+volumes:
+    consul-data:
+
+networks:
+    micro_net:
+        driver: bridge

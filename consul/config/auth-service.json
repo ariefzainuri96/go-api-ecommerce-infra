@@ -1,0 +1,15 @@
+{
+  "service": {
+    "id": "auth-service",
+    "name": "auth-service",
+    "address": "auth-service",
+    "port": 50051,
+    "checks": [
+      {
+        "grpc": "auth-service:50051",
+        "interval": "10s",
+        "timeout": "1s"
+      }
+    ]
+  }
+}
