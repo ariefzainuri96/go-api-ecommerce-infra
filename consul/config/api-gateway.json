@@ -8,7 +8,7 @@
       {
         "http": "http://api-gateway:9000/health",
         "interval": "10s",
-        "timeout": "1s"
+        "timeout": "2s"
       }
     ]
   }

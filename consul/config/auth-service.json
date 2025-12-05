@@ -8,7 +8,7 @@
       {
         "grpc": "auth-service:50051",
         "interval": "10s",
-        "timeout": "1s"
+        "timeout": "2s"
       }
     ]
   }

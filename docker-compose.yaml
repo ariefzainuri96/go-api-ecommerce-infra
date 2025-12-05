@@ -4,26 +4,28 @@ services:
     # --------------------------------------------------------
     # 1. Consul
     # --------------------------------------------------------
-    consul:
-        image: hashicorp/consul:latest
-        container_name: consul
-        command: agent -server -bootstrap -ui -client=0.0.0.0 -config-dir=/consul/config
-        volumes:
-            - ./consul/config:/consul/config
-        ports:
-            - '8500:8500'
-            - '8600:8600/udp'
-        networks:
-            - micro_net
-        restart: unless-stopped
+    # consul:
+    #     image: hashicorp/consul:latest
+    #     # container_name: consul
+    #     command: "agent -config-dir=/consul/config"
+    #     # command: agent -server -bootstrap -ui -config-dir=/consul/config -client=0.0.0.0 -client=0.0.0.0 -bind=0.0.0.0 -advertise=consul
+    #     volumes:
+    #         - ./consul/config:/consul/config
+    #     ports:
+    #         - '8500:8500'
+    #         - '8600:8600/udp'
+    #     networks:
+    #         - micro_net
+    #     # restart: unless-stopped
+    #     deploy:
+    #         restart_policy:
+    #             condition: on-failure        
 
     # --------------------------------------------------------
     # 2. Auth Service (scalable)
     # --------------------------------------------------------
     auth-service:
         image: flaminglassoo1996/auth-service:1.0.2
-        # deploy:
-        #     replicas: 2 # <--- SCALE HERE (multiple instances)
         depends_on:
             - consul
         # environment:
@@ -32,13 +34,20 @@ services:
             - ./env/auth-service.env
         networks:
             - micro_net
-        restart: unless-stopped
+        # restart: unless-stopped
+        deploy:
+            replicas: 2 # <--- SCALE HERE (multiple instances)
+            update_config:
+                parallelism: 1 # update one instance at a time
+                delay: 5s # wait between updates
+            restart_policy:
+                condition: on-failure
 
     # --------------------------------------------------------
     # 3. API Gateway
     # --------------------------------------------------------
     api-gateway:
-        image: flaminglassoo1996/api-gateway:1.0.3
+        image: flaminglassoo1996/api-gateway:1.0.4
         depends_on:
             - consul
         ports:
@@ -47,30 +56,40 @@ services:
             - ./env/api-gateway.env
         networks:
             - micro_net
-        restart: unless-stopped
+        # restart: unless-stopped
+        deploy:
+            replicas: 2 # <--- SCALE HERE (multiple instances)
+            update_config:
+                parallelism: 1 # update one instance at a time
+                delay: 5s # wait between updates
+            restart_policy:
+                condition: on-failure
 
     # --------------------------------------------------------
     # 4. Envoy Proxy (front of everything)
     # --------------------------------------------------------
-    envoy:
-        image: envoyproxy/envoy:v1.33-latest
-        container_name: envoy
-        depends_on:
-            - consul
-            - api-gateway
-            - auth-service
-        ports:
-            - '8080:8080' # envoy public ingress
-            - '9901:9901' # envoy admin
-        volumes:
-            - ./envoy/ingress.yaml:/etc/envoy/envoy.yaml:ro
-        networks:
-            - micro_net
-        restart: unless-stopped
+    # envoy:
+    #     image: envoyproxy/envoy:v1.33-latest
+    #     # container_name: envoy
+    #     depends_on:
+    #         - consul
+    #         - api-gateway
+    #         - auth-service
+    #     ports:
+    #         - '8080:8080' # envoy public ingress
+    #         - '9901:9901' # envoy admin
+    #     volumes:
+    #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    #     networks:
+    #         - micro_net
+    #     # restart: unless-stopped
+    #     deploy:
+    #         restart_policy:
+    #             condition: on-failure
 
-volumes:
-    consul-data:
+# volumes:
+#     consul-data:
 
 networks:
     micro_net:
-        driver: bridge
+        driver: overlay
