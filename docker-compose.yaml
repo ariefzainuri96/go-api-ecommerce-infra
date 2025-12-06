@@ -19,15 +19,12 @@ services:
     #     # restart: unless-stopped
     #     deploy:
     #         restart_policy:
-    #             condition: on-failure        
+    #             condition: on-failure
 
-    # --------------------------------------------------------
-    # 2. Auth Service (scalable)
-    # --------------------------------------------------------
     auth-service:
-        image: flaminglassoo1996/auth-service:1.0.2
-        depends_on:
-            - consul
+        image: flaminglassoo1996/auth-service:1.0.3
+        # depends_on:
+        #     - consul
         # environment:
         #     - CONSUL_HTTP_ADDR=consul:8500
         env_file:
@@ -40,16 +37,29 @@ services:
             update_config:
                 parallelism: 1 # update one instance at a time
                 delay: 5s # wait between updates
+                monitor: 10s # check if container crashes after update
+                max_failure_ratio: 0.1
+                order: start-first # start new replica before stopping old one
             restart_policy:
                 condition: on-failure
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--spider',
+                    '-q',
+                    'http://localhost:8081/health',
+                ]
+            interval: 10s
+            timeout: 3s
+            retries: 3
+            start_period: 5s
 
-    # --------------------------------------------------------
-    # 3. API Gateway
-    # --------------------------------------------------------
     api-gateway:
         image: flaminglassoo1996/api-gateway:1.0.4
-        depends_on:
-            - consul
+        # depends_on:
+        #     - consul
         ports:
             - '9000:9000'
         env_file:
@@ -62,8 +72,24 @@ services:
             update_config:
                 parallelism: 1 # update one instance at a time
                 delay: 5s # wait between updates
+                monitor: 10s # check if container crashes after update
+                max_failure_ratio: 0.1
+                order: start-first # start new replica before stopping old one
             restart_policy:
                 condition: on-failure
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--spider',
+                    '-q',
+                    'http://localhost:9000/health',
+                ]
+            interval: 10s
+            timeout: 3s
+            retries: 3
+            start_period: 5s
 
     # --------------------------------------------------------
     # 4. Envoy Proxy (front of everything)
