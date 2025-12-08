@@ -26,7 +26,7 @@ services:
         networks:
             - micro_net
         deploy:
-            replicas: 2
+            replicas: 1
             update_config:
                 parallelism: 1 # update one instance at a time
                 delay: 5s # wait between updates
@@ -126,13 +126,19 @@ services:
             - '3000:3000'
         environment:
             - GF_SECURITY_ADMIN_PASSWORD=admin # Change this on first login
+            # 1. Tell Grafana its full public URL
+            - GF_SERVER_ROOT_URL=${GRAFANA_FULL_URL:-https://zain-api.xyz/go-ecommerce/grafana/}
+            # 2. Tell Grafana to strip the path when handling requests internally
+            - GF_SERVER_SERVE_FROM_SUB_PATH=true
         networks:
             - micro_net
         volumes:
             - grafana-storage:/var/lib/grafana
+
 volumes:
     # ... existing volumes ...
     grafana-storage:
+
 networks:
     micro_net:
         driver: overlay
