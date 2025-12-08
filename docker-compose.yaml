@@ -1,113 +1,93 @@
 version: '3.8'
-
 services:
-    # --------------------------------------------------------
-    # 1. Consul
-    # --------------------------------------------------------
-    # consul:
-    #     image: hashicorp/consul:latest
-    #     # container_name: consul
-    #     command: "agent -config-dir=/consul/config"
-    #     # command: agent -server -bootstrap -ui -config-dir=/consul/config -client=0.0.0.0 -client=0.0.0.0 -bind=0.0.0.0 -advertise=consul
-    #     volumes:
-    #         - ./consul/config:/consul/config
-    #     ports:
-    #         - '8500:8500'
-    #         - '8600:8600/udp'
-    #     networks:
-    #         - micro_net
-    #     # restart: unless-stopped
-    #     deploy:
-    #         restart_policy:
-    #             condition: on-failure
-
-    auth-service:
-        image: flaminglassoo1996/auth-service:1.0.3
-        env_file:
-            - ./env/auth-service.env
-        networks:
-            - micro_net
-        deploy:
-            replicas: 2
-            update_config:
-                parallelism: 1 # update one instance at a time
-                delay: 5s # wait between updates
-                monitor: 10s # check if container crashes after update
-                max_failure_ratio: 0.1
-                order: start-first # start new replica before stopping old one
-            restart_policy:
-                condition: on-failure
-        healthcheck:
-            test:
-                [
-                    'CMD',
-                    'wget',
-                    '--spider',
-                    '-q',
-                    'http://localhost:8081/health',
-                ]
-            interval: 10s
-            timeout: 3s
-            retries: 3
-            start_period: 5s
-
-    api-gateway:
-        image: flaminglassoo1996/api-gateway:1.0.11
-        ports:
-            - '9000:9000'
-        env_file:
-            - ./env/api-gateway.env
-        networks:
-            - micro_net
-        deploy:
-            replicas: 2
-            update_config:
-                parallelism: 1 # update one instance at a time
-                delay: 5s # wait between updates
-                monitor: 10s # check if container crashes after update
-                max_failure_ratio: 0.1
-                order: start-first # start new replica before stopping old one
-            restart_policy:
-                condition: on-failure
-        healthcheck:
-            test:
-                [
-                    'CMD',
-                    'wget',
-                    '--spider',
-                    '-q',
-                    'http://localhost:9000/health',
-                ]
-            interval: 10s
-            timeout: 3s
-            retries: 3
-            start_period: 5s
-
-    # --------------------------------------------------------
-    # 4. Envoy Proxy (front of everything)
-    # --------------------------------------------------------
-    # envoy:
-    #     image: envoyproxy/envoy:v1.33-latest
-    #     # container_name: envoy
-    #     depends_on:
-    #         - consul
-    #         - api-gateway
-    #         - auth-service
-    #     ports:
-    #         - '8080:8080' # envoy public ingress
-    #         - '9901:9901' # envoy admin
-    #     volumes:
-    #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
-    #     networks:
-    #         - micro_net
-    #     # restart: unless-stopped
-    #     deploy:
-    #         restart_policy:
-    #             condition: on-failure
-
+  # --------------------------------------------------------
+  # 1. Consul
+  # --------------------------------------------------------
+  # consul:
+  #     image: hashicorp/consul:latest
+  #     # container_name: consul
+  #     command: "agent -config-dir=/consul/config"
+  #     # command: agent -server -bootstrap -ui -config-dir=/consul/config -client=0.0.0.0 -client=0.0.0.0 -bind=0.0.0.0 -advertise=consul
+  #     volumes:
+  #         - ./consul/config:/consul/config
+  #     ports:
+  #         - '8500:8500'
+  #         - '8600:8600/udp'
+  #     networks:
+  #         - micro_net
+  #     # restart: unless-stopped
+  #     deploy:
+  #         restart_policy:
+  #             condition: on-failure
+  auth-service:
+    image: flaminglassoo1996/auth-service:4c6c36e5a14b4bbc82e2e7a88fd8be6a413ac2da
+    env_file:
+      - ./env/auth-service.env
+    networks:
+      - micro_net
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1 # update one instance at a time
+        delay: 5s # wait between updates
+        monitor: 10s # check if container crashes after update
+        max_failure_ratio: 0.1
+        order: start-first # start new replica before stopping old one
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8081/health']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+  api-gateway:
+    image: flaminglassoo1996/api-gateway:1.0.11
+    ports:
+      - '9000:9000'
+    env_file:
+      - ./env/api-gateway.env
+    networks:
+      - micro_net
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1 # update one instance at a time
+        delay: 5s # wait between updates
+        monitor: 10s # check if container crashes after update
+        max_failure_ratio: 0.1
+        order: start-first # start new replica before stopping old one
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:9000/health']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+      # --------------------------------------------------------
+      # 4. Envoy Proxy (front of everything)
+      # --------------------------------------------------------
+      # envoy:
+      #     image: envoyproxy/envoy:v1.33-latest
+      #     # container_name: envoy
+      #     depends_on:
+      #         - consul
+      #         - api-gateway
+      #         - auth-service
+      #     ports:
+      #         - '8080:8080' # envoy public ingress
+      #         - '9901:9901' # envoy admin
+      #     volumes:
+      #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      #     networks:
+      #         - micro_net
+      #     # restart: unless-stopped
+      #     deploy:
+      #         restart_policy:
+      #             condition: on-failure
 # volumes:
 #     consul-data:
-
 networks:
-    micro_net:
-        driver: overlay
+  micro_net:
+    driver: overlay
