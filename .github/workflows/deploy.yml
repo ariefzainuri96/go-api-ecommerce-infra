@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             # Navigate to where your repo is cloned on the server
-            cd /opt/microservices/microservice-infra
+            cd /root/backend/go/go-api-ecommerce-infra
             
             # Pull the changes (the new image tag)
             git pull origin master
