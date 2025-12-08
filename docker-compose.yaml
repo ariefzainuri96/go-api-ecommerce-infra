@@ -1,141 +1,123 @@
 version: '3.8'
 services:
-    # --------------------------------------------------------
-    # 1. Consul
-    # --------------------------------------------------------
-    # consul:
-    #     image: hashicorp/consul:latest
-    #     # container_name: consul
-    #     command: "agent -config-dir=/consul/config"
-    #     # command: agent -server -bootstrap -ui -config-dir=/consul/config -client=0.0.0.0 -client=0.0.0.0 -bind=0.0.0.0 -advertise=consul
-    #     volumes:
-    #         - ./consul/config:/consul/config
-    #     ports:
-    #         - '8500:8500'
-    #         - '8600:8600/udp'
-    #     networks:
-    #         - micro_net
-    #     # restart: unless-stopped
-    #     deploy:
-    #         restart_policy:
-    #             condition: on-failure
-    auth-service:
-        image: flaminglassoo1996/auth-service:4a7f4557038dfe1a386a50a9aee50e6c2a9310b0
-        env_file:
-            - ./${ENV_FOLDER:-env}/auth-service.env
-        networks:
-            - micro_net
-        deploy:
-            replicas: 2
-            update_config:
-                parallelism: 1 # update one instance at a time
-                delay: 5s # wait between updates
-                monitor: 10s # check if container crashes after update
-                max_failure_ratio: 0.1
-                order: start-first # start new replica before stopping old one
-            restart_policy:
-                condition: on-failure
-        healthcheck:
-            test:
-                [
-                    'CMD',
-                    'wget',
-                    '--spider',
-                    '-q',
-                    'http://localhost:8081/health',
-                ]
-            interval: 10s
-            timeout: 3s
-            retries: 3
-            start_period: 5s
-    api-gateway:
-        image: flaminglassoo1996/api-gateway:456ec89f4385df75023d90dac5d4c4cba678e6c5
-        ports:
-            - '9000:9000'
-        env_file:
-            - ./${ENV_FOLDER:-env}/api-gateway.env
-        networks:
-            - micro_net
-        deploy:
-            replicas: 2
-            update_config:
-                parallelism: 1 # update one instance at a time
-                delay: 5s # wait between updates
-                monitor: 10s # check if container crashes after update
-                max_failure_ratio: 0.1
-                order: start-first # start new replica before stopping old one
-            restart_policy:
-                condition: on-failure
-        healthcheck:
-            test:
-                [
-                    'CMD',
-                    'wget',
-                    '--spider',
-                    '-q',
-                    'http://localhost:9000/health',
-                ]
-            interval: 10s
-            timeout: 3s
-            retries: 3
-            start_period: 5s
-    # --------------------------------------------------------
-    # 4. Envoy Proxy (front of everything)
-    # --------------------------------------------------------
-    # envoy:
-    #     image: envoyproxy/envoy:v1.33-latest
-    #     # container_name: envoy
-    #     depends_on:
-    #         - consul
-    #         - api-gateway
-    #         - auth-service
-    #     ports:
-    #         - '8080:8080' # envoy public ingress
-    #         - '9901:9901' # envoy admin
-    #     volumes:
-    #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
-    #     networks:
-    #         - micro_net
-    #     # restart: unless-stopped
-    #     deploy:
-    #         restart_policy:
-    #             condition: on-failure
-    
-    # --------------------------------------------------------
-    # 5. Logging Stack (Loki + Promtail + Grafana)
-    # --------------------------------------------------------
-    loki:
-        image: grafana/loki:latest
-        ports:
-            - '3100:3100'
-        command: -config.file=/etc/loki/local-config.yaml
-        networks:
-            - micro_net
+  # --------------------------------------------------------
+  # 1. Consul
+  # --------------------------------------------------------
+  # consul:
+  #     image: hashicorp/consul:latest
+  #     # container_name: consul
+  #     command: "agent -config-dir=/consul/config"
+  #     # command: agent -server -bootstrap -ui -config-dir=/consul/config -client=0.0.0.0 -client=0.0.0.0 -bind=0.0.0.0 -advertise=consul
+  #     volumes:
+  #         - ./consul/config:/consul/config
+  #     ports:
+  #         - '8500:8500'
+  #         - '8600:8600/udp'
+  #     networks:
+  #         - micro_net
+  #     # restart: unless-stopped
+  #     deploy:
+  #         restart_policy:
+  #             condition: on-failure
+  auth-service:
+    image: flaminglassoo1996/auth-service:4a7f4557038dfe1a386a50a9aee50e6c2a9310b0
+    env_file:
+      - ./${ENV_FOLDER:-env}/auth-service.env
+    networks:
+      - micro_net
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1 # update one instance at a time
+        delay: 5s # wait between updates
+        monitor: 10s # check if container crashes after update
+        max_failure_ratio: 0.1
+        order: start-first # start new replica before stopping old one
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8081/health']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+  api-gateway:
+    image: flaminglassoo1996/api-gateway:85ec91f22f05e6ca27f845af433627eb7dd3c026
+    ports:
+      - '9000:9000'
+    env_file:
+      - ./${ENV_FOLDER:-env}/api-gateway.env
+    networks:
+      - micro_net
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1 # update one instance at a time
+        delay: 5s # wait between updates
+        monitor: 10s # check if container crashes after update
+        max_failure_ratio: 0.1
+        order: start-first # start new replica before stopping old one
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:9000/health']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+  # --------------------------------------------------------
+  # 4. Envoy Proxy (front of everything)
+  # --------------------------------------------------------
+  # envoy:
+  #     image: envoyproxy/envoy:v1.33-latest
+  #     # container_name: envoy
+  #     depends_on:
+  #         - consul
+  #         - api-gateway
+  #         - auth-service
+  #     ports:
+  #         - '8080:8080' # envoy public ingress
+  #         - '9901:9901' # envoy admin
+  #     volumes:
+  #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+  #     networks:
+  #         - micro_net
+  #     # restart: unless-stopped
+  #     deploy:
+  #         restart_policy:
+  #             condition: on-failure
 
-    promtail:
-        image: grafana/promtail:latest
-        volumes:
-            - /var/lib/docker/containers:/var/lib/docker/containers:ro # Read container logs
-            - ./config/promtail-config.yaml:/etc/promtail/config.yml # You need to create this file
-        command: -config.file=/etc/promtail/config.yml
-        networks:
-            - micro_net
-
-    grafana:
-        image: grafana/grafana:latest
-        ports:
-            - '3000:3000'
-        environment:
-            - GF_SECURITY_ADMIN_PASSWORD=admin # Change this on first login
-        networks:
-            - micro_net
-        volumes:
-            - grafana-storage:/var/lib/grafana
-
+  # --------------------------------------------------------
+  # 5. Logging Stack (Loki + Promtail + Grafana)
+  # --------------------------------------------------------
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - '3100:3100'
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - micro_net
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro # Read container logs
+      - ./config/promtail-config.yaml:/etc/promtail/config.yml # You need to create this file
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - micro_net
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin # Change this on first login
+    networks:
+      - micro_net
+    volumes:
+      - grafana-storage:/var/lib/grafana
 volumes:
-    # ... existing volumes ...
-    grafana-storage:
-
+  # ... existing volumes ...
+  grafana-storage:
 networks:
-    micro_net:
-        driver: overlay
+  micro_net:
+    driver: overlay
