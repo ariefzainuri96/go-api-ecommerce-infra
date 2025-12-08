@@ -23,17 +23,12 @@ services:
 
     auth-service:
         image: flaminglassoo1996/auth-service:1.0.3
-        # depends_on:
-        #     - consul
-        # environment:
-        #     - CONSUL_HTTP_ADDR=consul:8500
         env_file:
             - ./env/auth-service.env
         networks:
             - micro_net
-        # restart: unless-stopped
         deploy:
-            replicas: 2 # <--- SCALE HERE (multiple instances)
+            replicas: 2
             update_config:
                 parallelism: 1 # update one instance at a time
                 delay: 5s # wait between updates
@@ -58,17 +53,14 @@ services:
 
     api-gateway:
         image: flaminglassoo1996/api-gateway:1.0.11
-        # depends_on:
-        #     - consul
         ports:
             - '9000:9000'
         env_file:
             - ./env/api-gateway.env
         networks:
             - micro_net
-        # restart: unless-stopped
         deploy:
-            replicas: 2 # <--- SCALE HERE (multiple instances)
+            replicas: 2
             update_config:
                 parallelism: 1 # update one instance at a time
                 delay: 5s # wait between updates

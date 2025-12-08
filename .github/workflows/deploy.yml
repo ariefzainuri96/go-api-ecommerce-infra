@@ -1,0 +1,33 @@
+name: Deploy to Swarm
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Swarm Manager
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Navigate to where your repo is cloned on the server
+            cd /opt/microservices/microservice-infra
+            
+            # Pull the changes (the new image tag)
+            git pull origin master
+            
+            # Deploy the stack
+            # Docker Swarm is smart; it sees only the image tag changed 
+            # and will perform a rolling update based on your deploy:update_config
+            docker stack deploy -c docker-compose.yaml my_stack_name
+            
+            # Optional: Prune old images to save space
+            docker image prune -f
