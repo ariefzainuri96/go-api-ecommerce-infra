@@ -104,40 +104,40 @@ services:
     # --------------------------------------------------------
     # 5. Logging Stack (Loki + Promtail + Grafana)
     # --------------------------------------------------------
-    loki:
-        image: grafana/loki:latest
-        ports:
-            - '3100:3100'
-        command: -config.file=/etc/loki/local-config.yaml
-        networks:
-            - micro_net
-    promtail:
-        image: grafana/promtail:latest
-        volumes:
-            - /var/lib/docker/containers:/var/lib/docker/containers:ro # Read container logs
-            - /var/run/docker.sock:/var/run/docker.sock  # <--- ADD THIS LINE
-            - ./config/promtail-config.yaml:/etc/promtail/config.yml # You need to create this file
-        command: -config.file=/etc/promtail/config.yml
-        networks:
-            - micro_net
-    grafana:
-        image: grafana/grafana:latest
-        ports:
-            - '3000:3000'
-        environment:
-            - GF_SECURITY_ADMIN_PASSWORD=admin # Change this on first login
-            # 1. Tell Grafana its full public URL
-            - GF_SERVER_ROOT_URL=${GRAFANA_FULL_URL:-https://zain-api.xyz/go-ecommerce/grafana/}
-            # 2. Tell Grafana to strip the path when handling requests internally
-            - GF_SERVER_SERVE_FROM_SUB_PATH=true
-        networks:
-            - micro_net
-        volumes:
-            - grafana-storage:/var/lib/grafana
+    # loki:
+    #     image: grafana/loki:latest
+    #     ports:
+    #         - '3100:3100'
+    #     command: -config.file=/etc/loki/local-config.yaml
+    #     networks:
+    #         - micro_net
+    # promtail:
+    #     image: grafana/promtail:latest
+    #     volumes:
+    #         - /var/lib/docker/containers:/var/lib/docker/containers:ro # Read container logs
+    #         - /var/run/docker.sock:/var/run/docker.sock  # <--- ADD THIS LINE
+    #         - ./config/promtail-config.yaml:/etc/promtail/config.yml # You need to create this file
+    #     command: -config.file=/etc/promtail/config.yml
+    #     networks:
+    #         - micro_net
+    # grafana:
+    #     image: grafana/grafana:latest
+    #     ports:
+    #         - '3000:3000'
+    #     environment:
+    #         - GF_SECURITY_ADMIN_PASSWORD=admin # Change this on first login
+    #         # 1. Tell Grafana its full public URL
+    #         - GF_SERVER_ROOT_URL=${GRAFANA_FULL_URL:-https://zain-api.xyz/go-ecommerce/grafana/}
+    #         # 2. Tell Grafana to strip the path when handling requests internally
+    #         - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    #     networks:
+    #         - micro_net
+    #     volumes:
+    #         - grafana-storage:/var/lib/grafana
 
-volumes:
-    # ... existing volumes ...
-    grafana-storage:
+# volumes:
+#     # ... existing volumes ...
+#     grafana-storage:
 
 networks:
     micro_net:
