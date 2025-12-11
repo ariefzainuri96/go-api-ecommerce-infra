@@ -31,3 +31,5 @@ jobs:
             
             # Optional: Prune old images to save space
             docker image prune -f
+
+            docker system prune -a -f
