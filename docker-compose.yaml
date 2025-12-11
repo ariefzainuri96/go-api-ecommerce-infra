@@ -33,6 +33,7 @@ services:
                 monitor: 10s # check if container crashes after update
                 max_failure_ratio: 0.1
                 order: start-first # start new replica before stopping old one
+                failure_action: rollback
             restart_policy:
                 condition: on-failure
         healthcheck:
@@ -64,6 +65,7 @@ services:
                 monitor: 10s # check if container crashes after update
                 max_failure_ratio: 0.1
                 order: start-first # start new replica before stopping old one
+                failure_action: rollback
             restart_policy:
                 condition: on-failure
         healthcheck:
