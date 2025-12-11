@@ -57,7 +57,7 @@ services:
         networks:
             - micro_net
         deploy:
-            replicas: 2
+            replicas: 1
             update_config:
                 parallelism: 1 # update one instance at a time
                 delay: 5s # wait between updates
