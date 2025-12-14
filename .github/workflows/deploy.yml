@@ -23,6 +23,33 @@ jobs:
             
             # Pull the changes (the new image tag)
             git pull origin master
+
+            # Install yq (idempotent)
+            command -v yq >/dev/null 2>&1 || \
+              (wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq)
+
+            echo "Checking image availability..."
+
+            IMAGES=$(yq '.services[].image' docker-compose.yaml)
+
+            for IMAGE in $IMAGES; do
+              echo "Waiting for image $IMAGE..."
+              for i in {1..30}; do
+                if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+                  echo "✔ Image available: $IMAGE"
+                  break
+                fi
+
+                if [ $i -eq 30 ]; then
+                  echo "❌ Image not found after waiting: $IMAGE"
+                  exit 1
+                fi
+
+                sleep 5
+              done
+            done
+
+            echo "All images are available. Deploying stack..."
             
             # Deploy the stack
             # Docker Swarm is smart; it sees only the image tag changed 
