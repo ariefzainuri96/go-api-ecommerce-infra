@@ -43,7 +43,7 @@ services:
       retries: 3
       start_period: 5s
   api-gateway:
-    image: flaminglassoo1996/api-gateway:85ec91f22f05e6ca27f845af433627eb7dd3c026
+    image: flaminglassoo1996/api-gateway:7693697e50d5583d064d873c8d243111637f5dd4
     ports:
       - '9000:9000'
     env_file:
@@ -67,27 +67,27 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
-  # --------------------------------------------------------
-  # 4. Envoy Proxy (front of everything)
-  # --------------------------------------------------------
-  # envoy:
-  #     image: envoyproxy/envoy:v1.33-latest
-  #     # container_name: envoy
-  #     depends_on:
-  #         - consul
-  #         - api-gateway
-  #         - auth-service
-  #     ports:
-  #         - '8080:8080' # envoy public ingress
-  #         - '9901:9901' # envoy admin
-  #     volumes:
-  #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
-  #     networks:
-  #         - micro_net
-  #     # restart: unless-stopped
-  #     deploy:
-  #         restart_policy:
-  #             condition: on-failure
+      # --------------------------------------------------------
+      # 4. Envoy Proxy (front of everything)
+      # --------------------------------------------------------
+      # envoy:
+      #     image: envoyproxy/envoy:v1.33-latest
+      #     # container_name: envoy
+      #     depends_on:
+      #         - consul
+      #         - api-gateway
+      #         - auth-service
+      #     ports:
+      #         - '8080:8080' # envoy public ingress
+      #         - '9901:9901' # envoy admin
+      #     volumes:
+      #         - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      #     networks:
+      #         - micro_net
+      #     # restart: unless-stopped
+      #     deploy:
+      #         restart_policy:
+      #             condition: on-failure
 # --------------------------------------------------------
 # 5. Logging Stack (Loki + Promtail + Grafana)
 # --------------------------------------------------------
