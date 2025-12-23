@@ -43,7 +43,7 @@ services:
       retries: 3
       start_period: 5s
   api-gateway:
-    image: flaminglassoo1996/api-gateway:7693697e50d5583d064d873c8d243111637f5dd4
+    image: flaminglassoo1996/api-gateway:708483958e6f3af1968e21fa558cb699384d407a
     ports:
       - '9000:9000'
     env_file:
