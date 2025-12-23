@@ -49,7 +49,18 @@ jobs:
               done
             done
 
-            echo "All images are available. Deploying stack..."
+            # ---------------------------------------------------------
+            # NEW: Check if Swarm is active, if not, initialize it
+            # ---------------------------------------------------------
+            if [ "$(docker info --format '{{.Swarm.LocalNodeState}}')" != "active" ]; then
+                echo "⚠️ Docker Swarm is NOT active. Initializing now..."
+                # Initialize Swarm (Advertise addr is usually auto-detected on single VPS)
+                docker swarm init
+            else
+                echo "✅ Docker Swarm is already active."
+            fi
+            
+            echo "All images are available. Deploying stack..."            
             
             # Deploy the stack
             # Docker Swarm is smart; it sees only the image tag changed 
